@@ -1,0 +1,96 @@
+name: .NET Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    #runs-on: windows-2019
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '7.x' # Adjust based on your .NET version
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+    
+    - name: Install dependencies
+      run: dotnet restore DemoApp
+    
+    - name: Build
+      run: dotnet build DemoApp --configuration Release --no-restore
+    
+    - name: Run tests
+      run: dotnet test DemoApp --no-restore --verbosity normal
+    
+    - name: Publish
+      run: dotnet publish DemoApp -c Release -o ${{ github.workspace }}/publish      
+
+    - name: Archive files
+      uses: actions/upload-artifact@v4
+      with:
+        name: drop
+        path: ${{ github.workspace }}/publish
+        
+
+##Deploy into IIS
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: drop
+       
+        
+    - name: Deploy to IIS
+      run: |
+        Import-Module WebAdministration
+        Stop-WebSite -Name 'DemoApp'
+        Remove-Item 'C:\inetpub\wwwroot\DemoApp\*' -Recurse -Force
+        Copy-Item -Path ${{ github.workspace }}\drop\* -Destination 'C:\inetpub\wwwroot\DemoApp'
+        # Start-WebSite -Name 'DemoApp'Import-Module WebAdministration
+         Import-Module WebAdministration
+         $session = Get-PSSession -Name WinPSCompatSession
+         # $sb = {Set-ItemProperty "IIS:\Default Web Site\DemoApp" -Name physicalPath -Value "C:\Dev\Test\websites\DemoApp"}
+         $sb = {Set-ItemProperty myapp -Name physicalPath -Value "C:\Dev\Test\websites\DemoApp"}         
+         Invoke-Command -Scriptblock $sb -Session $session
+         # set-itemproperty myapp -name physicalPath -value D:\Projects\Demo
+        
+
+      # name: Copy files to IIS Server
+      # run: 
+      #   $sourcePath = "${{ github.workspace }}\drop"
+      #   $destinationPath = "C:\inetpub\wwwroot\DemoApp"
+      #   #$destinationPath = "C:\GitLabTest"
+      #   $siteName = "DemoApp"
+
+      #   Stop the IIS site
+      #   Stop-WebSite -Name $siteName
+
+       #  Remove existing files from the destination directory
+       #  Remove-Item "$destinationPath\*" -Recurse -Force
+
+       #  Copy new files from the source directory
+       #  Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -Recurse -Force
+
+        # Start the IIS site
+        # Start-WebSite -Name $DemoApp
+
+      # shell: pwsh 
+        
