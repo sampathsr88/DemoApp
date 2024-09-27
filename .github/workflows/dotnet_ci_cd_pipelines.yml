@@ -1,30 +1,29 @@
-name: .NET Pipeline
+name: .NET Framework CI
 
 on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
-      - develop
 
 jobs:
   build:
-    #runs-on: windows-2019
-    runs-on: self-hosted
-    
-    steps: 
+    runs-on: windows-latest
+
+    steps:
     - name: Checkout code
-      uses: actions/checkout@v2 #working 
-      
-    - name: Set up .NET Framework 4.0
-      uses: microsoft/setup-msbuild@v1.0.3
-      with:
-          msbuild-version: '10.0' # Make sure the MSBuild version supports .NET 4.0
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Framework
+      run: |
+        # Install .NET Framework 4.0 build tools
+        choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools --includeRecommended --includeOptional"
+        choco install visualstudio2019-workload-netcoretools
+        
+    - name: Restore NuGet packages
+      run: nuget restore /DemoApp.sln
 
     - name: Build solution
-      run: msbuild DemoApp.sln /p:Configuration=Release
-
-        
+      run: msbuild /DemoApp.sln /p:Configuration=Release /p:Platform="Any CPU"
