@@ -23,7 +23,7 @@ jobs:
         choco install visualstudio2019-workload-netcoretools
         
     - name: Restore NuGet packages
-      run: nuget restore /DemoApp.sln
+      run: nuget restore DemoApp.sln
 
     - name: Build solution
-      run: msbuild /DemoApp.sln /p:Configuration=Release /p:Platform="Any CPU"
+      run: msbuild DemoApp.sln /p:Configuration=Release /p:Platform="Any CPU"
