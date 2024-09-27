@@ -19,8 +19,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2 #working 
       
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
+    - name: Set up .NET Framework 4.0
+      uses: microsoft/setup-msbuild@v1.0.3
+      with:
+          msbuild-version: '16.0' # Make sure the MSBuild version supports .NET 4.0
 
     - name: Build solution
       run: msbuild DemoApp.sln /p:Configuration=Release
