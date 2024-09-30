@@ -1,29 +1,21 @@
-name: .NET Framework CI
+name: Deploy to IIS
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
 jobs:
   build:
     runs-on: windows-latest
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup .NET Framework
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v1
+    
+    - name: Build the application
       run: |
-        # Install .NET Framework 4.0 build tools
-        choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools --includeRecommended --includeOptional"
-        choco install visualstudio2019-workload-netcoretools
-        
-    - name: Restore NuGet packages
-      run: nuget restore DemoApp.sln
-
-    - name: Build solution
-      run: msbuild DemoApp.sln /p:Configuration=Release /p:Platform="Any CPU"
+        MSBuild.exe DemoApp.sln /p:Configuration=Release
