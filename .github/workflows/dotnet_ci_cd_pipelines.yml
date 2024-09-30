@@ -18,4 +18,4 @@ jobs:
     
     - name: Build the application
       run: |
-        MSBuild.exe DemoApp /p:Configuration=Release
+        MSBuild.exe DemoApp.vbproj /p:Configuration=Release
