@@ -14,8 +14,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up MSBuild
-      uses: microsoft/setup-msbuild@v1
+      uses: microsoft/setup-msbuild@v1      
     
     - name: Build the application
       run: |
-        MSBuild.exe DemoApp.vbproj /p:Configuration=Release
+        msbuild "DemoApp.vbproj" /p:Configuration=Release /p:TargetFrameworkVersion=v4.0
+
