@@ -18,5 +18,5 @@ jobs:
     
     - name: Build the application
       run: |
-        msbuild "DemoApp" /p:Configuration=Release /p:TargetFrameworkVersion=v4.0
+        msbuild "DemoApp/DemoApp.vbproj" /p:Configuration=Release /p:TargetFrameworkVersion=v4.0
 
